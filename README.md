@@ -93,6 +93,11 @@ Después abre `http://localhost:8000` en el navegador.
 | `Espacio` | Hard drop (caída instantánea)     |
 | `P` o `Esc` | Abrir / cerrar el menú de pausa |
 | `T`       | Alternar tema claro / oscuro      |
+| `K`       | Cambiar de skin (Retro, Neon, Pastel, Pixel art) |
+
+### Skins
+
+Selector `#skin-select` (arriba a la derecha) o tecla `K`. La elección se guarda en `localStorage` (`skin`) y se aplica al instante, sin recargar. Cada skin del objeto `SKINS` en `game.js` define su paleta `colors`, opcionalmente `boardBg` / `grid`, y su función `drawBlock`.
 
 **Menú de pausa** (se abre con `P` o `Esc`): **Reanudar**, **Reiniciar** (nueva partida sin recargar), **Ver controles** (lista de teclas) y **Nivel inicial** (1–10, se guarda en `localStorage` y se aplica a la próxima partida). Navega con `↑` / `↓`, cambia el nivel con `←` / `→` y acepta con `Enter`. Mientras el menú está abierto los controles del juego quedan bloqueados, y al reanudar se ignoran las teclas durante ~150 ms (o hasta soltar las que seguían pulsadas) para evitar movimientos accidentales.
 
