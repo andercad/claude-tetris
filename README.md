@@ -88,6 +88,11 @@ Después abre `http://localhost:8000` en el navegador.
 | `Espacio` | Hard drop (caída instantánea)     |
 | `P`       | Pausar / reanudar                 |
 | `T`       | Alternar tema claro / oscuro      |
+| `K`       | Cambiar de skin (Retro, Neon, Pastel, Pixel art) |
+
+### Skins
+
+Selector `#skin-select` (arriba a la derecha) o tecla `K`. La elección se guarda en `localStorage` (`skin`) y se aplica al instante, sin recargar. Cada skin del objeto `SKINS` en `game.js` define su paleta `colors`, opcionalmente `boardBg` / `grid`, y su función `drawBlock`.
 
 ---
 
