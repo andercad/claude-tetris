@@ -89,6 +89,19 @@ Después abre `http://localhost:8000` en el navegador.
 | `P`       | Pausar / reanudar                 |
 | `T`       | Alternar tema claro / oscuro      |
 
+### Skins visuales
+
+El selector **Skin** (arriba a la izquierda, `<select id="skin-select">`) cambia la apariencia sin recargar y se guarda en `localStorage` (clave `skin`). Se aplica al tablero, la pieza siguiente y el ghost, y convive con el tema claro/oscuro.
+
+| Skin      | Estilo                                                 |
+| --------- | ------------------------------------------------------ |
+| Retro     | Bloques cuadrados, colores planos (por defecto)        |
+| Neon      | Fondo negro, brillo con `shadowBlur`                   |
+| Pastel    | Colores suaves, bordes redondeados                     |
+| Pixel art | Textura de píxeles y bisel dibujados sobre cada bloque |
+
+Para añadir una skin: nueva entrada en `SKINS` (`game.js`) con `colors`, `bg`, `grid` y `draw`, y su `<option>` en `index.html`.
+
 ---
 
 ## Cómo funciona
@@ -176,7 +189,7 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `COLS`         | Columnas del tablero                     | `10`                  |
 | `ROWS`         | Filas del tablero                        | `20`                  |
 | `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
-| `COLORS`       | Paleta de colores por tipo de pieza      | 8 colores             |
+| `SKINS`        | Skins: paleta, fondo, rejilla y draw     | 4 skins               |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
 
