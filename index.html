@@ -44,7 +44,7 @@
             <li><kbd>↑</kbd> rotar</li>
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
-            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>P</kbd>/<kbd>Esc</kbd> pausa</li>
             <li><kbd>T</kbd> tema</li>
           </ul>
         </div>
@@ -56,6 +56,32 @@
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden" role="dialog" aria-label="Menú de pausa">
+      <div class="overlay-box pause-menu">
+        <p class="pause-title">PAUSA</p>
+        <div id="pause-main" class="pause-section">
+          <button id="resume-btn" class="menu-btn">Reanudar</button>
+          <button id="pause-restart-btn" class="menu-btn">Reiniciar</button>
+          <button id="controls-btn" class="menu-btn">Ver controles</button>
+          <label class="level-select">
+            <span>Nivel inicial</span>
+            <select id="start-level"></select>
+          </label>
+        </div>
+        <div id="pause-controls" class="pause-section hidden">
+          <ul class="menu-controls">
+            <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+            <li><kbd>↑</kbd> / <kbd>X</kbd> rotar</li>
+            <li><kbd>↓</kbd> bajar</li>
+            <li><kbd>Space</kbd> caída</li>
+            <li><kbd>P</kbd> / <kbd>Esc</kbd> pausa</li>
+            <li><kbd>T</kbd> tema</li>
+          </ul>
+          <button id="controls-back-btn" class="menu-btn">Volver</button>
+        </div>
       </div>
     </div>
     </div>
