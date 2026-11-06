@@ -205,6 +205,34 @@ kbd {
   background: var(--accent-hover);
 }
 
+/* ---- Selector de skin ---- */
+.skin-picker {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.skin-picker select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 12px;
+}
+
+[data-skin="neon"] #board,
+[data-skin="neon"] #next-canvas {
+  background: #000;
+  border-color: #00f0ff55;
+  box-shadow: 0 0 24px #00f0ff44;
+}
+
 /* ---- Toggle de tema ---- */
 .theme-toggle {
   position: fixed;
