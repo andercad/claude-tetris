@@ -4,7 +4,8 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
 
-const COLORS = [
+// Paletas por skin (índice = tipo de pieza: I O T S Z J L N)
+const RETRO_COLORS = [
   null,
   '#4dd0e1', // I - cyan
   '#ffd54f', // O - yellow
@@ -15,6 +16,83 @@ const COLORS = [
   '#ffb74d', // L - orange
   '#b0bec5', // N - tuerca (gris metálico)
 ];
+const NEON_COLORS = [null, '#00fff7', '#ffee00', '#d400ff', '#39ff14', '#ff073a', '#2979ff', '#ff9100', '#e0e0e0'];
+const PASTEL_COLORS = [null, '#a8e6f0', '#fff3b0', '#d7b8f3', '#b9f0c4', '#ffb3b3', '#b5d3ff', '#ffd3a5', '#d9e2e7'];
+const PIXEL_COLORS = [null, '#29b6f6', '#fdd835', '#ab47bc', '#66bb6a', '#ef5350', '#5c6bc0', '#ff9800', '#90a4ae'];
+
+function roundRectPath(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+// Cada skin: colors, bg (fondo del canvas o null = transparente/tema), grid (color de rejilla o null = tema),
+// draw(context, px, py, size, color) dibuja un bloque en píxeles
+const SKINS = {
+  retro: {
+    label: 'Retro', colors: RETRO_COLORS, bg: null, grid: null,
+    draw(c, px, py, s, color) {
+      c.fillStyle = color;
+      c.fillRect(px + 1, py + 1, s - 2, s - 2);
+      c.fillStyle = 'rgba(255,255,255,0.12)';
+      c.fillRect(px + 1, py + 1, s - 2, 4);
+    },
+  },
+  neon: {
+    label: 'Neon', colors: NEON_COLORS, bg: '#000000', grid: '#14141f',
+    draw(c, px, py, s, color) {
+      c.save();
+      c.shadowColor = color;
+      c.shadowBlur = 12;
+      c.strokeStyle = color;
+      c.lineWidth = 2;
+      c.strokeRect(px + 3, py + 3, s - 6, s - 6);
+      c.fillStyle = color;
+      c.globalAlpha *= 0.35;
+      c.fillRect(px + 3, py + 3, s - 6, s - 6);
+      c.restore();
+    },
+  },
+  pastel: {
+    label: 'Pastel', colors: PASTEL_COLORS, bg: null, grid: null,
+    draw(c, px, py, s, color) {
+      roundRectPath(c, px + 1.5, py + 1.5, s - 3, s - 3, s * 0.3);
+      c.fillStyle = color;
+      c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.7)';
+      c.lineWidth = 1.5;
+      c.stroke();
+    },
+  },
+  pixel: {
+    label: 'Pixel art', colors: PIXEL_COLORS, bg: null, grid: null,
+    draw(c, px, py, s, color) {
+      const u = Math.max(2, Math.floor(s / 6)); // "pixel" de la textura
+      c.fillStyle = color;
+      c.fillRect(px, py, s, s);
+      // textura: tablero de ajedrez sutil
+      c.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let i = 0; i * u < s; i++)
+        for (let j = 0; j * u < s; j++)
+          if ((i + j) % 2) c.fillRect(px + i * u, py + j * u, Math.min(u, s - i * u), Math.min(u, s - j * u));
+      // bisel pixelado
+      c.fillStyle = 'rgba(255,255,255,0.55)';
+      c.fillRect(px, py, s, u);
+      c.fillRect(px, py, u, s);
+      c.fillStyle = 'rgba(0,0,0,0.45)';
+      c.fillRect(px, py + s - u, s, u);
+      c.fillRect(px + s - u, py, u, s);
+    },
+  },
+};
+
+let skinName = 'retro';
+let skin = SKINS.retro;
+let COLORS = skin.colors;
 
 const PIECES = [
   null,
@@ -52,7 +130,8 @@ const startLevelSelect = document.getElementById('start-level');
 
 let startLevel = 1;
 const MAX_START_LEVEL = 15;
-let gridColor = '#22222e';
+let themeGridColor = '#22222e';
+let gridColor = themeGridColor;
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
 const themeToggle = document.getElementById('theme-toggle');
@@ -60,9 +139,22 @@ const themeToggle = document.getElementById('theme-toggle');
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   themeToggle.setAttribute('aria-checked', theme === 'light' ? 'true' : 'false');
-  gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || gridColor;
+  themeGridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || themeGridColor;
+  gridColor = skin.grid || themeGridColor;
   // refresca el canvas si el loop está detenido (pausa / game over)
   if (current && (paused || gameOver)) { draw(); drawNext(); }
+}
+
+const skinSelect = document.getElementById('skin-select');
+
+function applySkin(name) {
+  if (!SKINS[name]) name = 'retro';
+  skinName = name;
+  skin = SKINS[name];
+  COLORS = skin.colors;
+  gridColor = skin.grid || themeGridColor;
+  skinSelect.value = name;
+  if (current) { draw(); drawNext(); } // refresco inmediato sin recargar
 }
 
 function toggleTheme() {
@@ -191,14 +283,17 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  skin.draw(context, x * size, y * size, size, COLORS[colorIndex]);
   context.globalAlpha = 1;
+}
+
+function clearCanvas(context, cv) {
+  context.clearRect(0, 0, cv.width, cv.height);
+  if (skin.bg) {
+    context.fillStyle = skin.bg;
+    context.fillRect(0, 0, cv.width, cv.height);
+  }
 }
 
 function drawGrid() {
@@ -219,7 +314,7 @@ function drawGrid() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clearCanvas(ctx, canvas);
   drawGrid();
 
   // board
@@ -245,7 +340,7 @@ function draw() {
 
 function drawNext() {
   const NB = 30;
-  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  clearCanvas(nextCtx, nextCanvas);
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -385,8 +480,17 @@ themeToggle.addEventListener('click', () => {
   themeToggle.blur(); // evita que Space alterne el tema durante la partida
 });
 
+skinSelect.addEventListener('change', () => {
+  applySkin(skinSelect.value);
+  try { localStorage.setItem('skin', skinName); } catch (e) {}
+  skinSelect.blur(); // evita que las flechas/Space cambien la skin durante la partida
+});
+
 let savedTheme = 'dark';
 try { if (localStorage.getItem('theme') === 'light') savedTheme = 'light'; } catch (e) {}
+let savedSkin = 'retro';
+try { savedSkin = localStorage.getItem('skin') || 'retro'; } catch (e) {}
+applySkin(savedSkin);
 applyTheme(savedTheme);
 
 init();
