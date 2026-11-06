@@ -205,6 +205,86 @@ kbd {
   background: var(--accent-hover);
 }
 
+/* ---- Records ---- */
+.hidden { display: none !important; }
+
+.record-msg {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.name-form {
+  display: flex;
+  gap: 6px;
+}
+
+.name-form input {
+  width: 140px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--kbd-border);
+  background: var(--board-bg);
+  color: var(--text);
+  font-size: 14px;
+  user-select: text;
+}
+
+.name-form button {
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 240px;
+}
+
+.records ol {
+  list-style: none;
+  width: 100%;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+}
+
+.records li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.records li.empty { color: var(--muted); }
+
+.records li.highlight {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.stats {
+  font-size: 12px;
+  color: var(--controls-text);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /* ---- Toggle de tema ---- */
 .theme-toggle {
   position: fixed;
