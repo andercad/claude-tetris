@@ -572,7 +572,22 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', init);
+restartBtn.addEventListener('click', () => {
+  init();
+  restartBtn.blur();
+});
+
+nameForm.addEventListener('submit', submitName);
+
+resetRecordsBtn.addEventListener('click', () => {
+  if (!confirm('¿Borrar todos los records?')) return;
+  try { localStorage.removeItem(RECORDS_KEY); } catch (e) {}
+  pendingRank = -1;
+  nameForm.classList.add('hidden');
+  recordMsg.classList.add('hidden');
+  renderRecords();
+  resetRecordsBtn.blur();
+});
 resumeBtn.addEventListener('click', togglePause);
 pauseRestartBtn.addEventListener('click', init);
 controlsBtn.addEventListener('click', () => {
