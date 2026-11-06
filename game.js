@@ -41,7 +41,17 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const pauseOverlay = document.getElementById('pause-overlay');
+const pauseMain = document.getElementById('pause-main');
+const pauseControls = document.getElementById('pause-controls');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const controlsBackBtn = document.getElementById('controls-back-btn');
+const startLevelSelect = document.getElementById('start-level');
 
+let startLevel = 1;
+const MAX_START_LEVEL = 15;
 let gridColor = '#22222e';
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -59,6 +69,10 @@ function toggleTheme() {
   const theme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
   applyTheme(theme);
   try { localStorage.setItem('theme', theme); } catch (e) {}
+}
+
+function intervalForLevel(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
 }
 
 function createBoard() {
@@ -125,8 +139,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = startLevel + Math.floor(lines / 10);
+    dropInterval = intervalForLevel(level);
     updateHUD();
   }
 }
@@ -257,10 +271,30 @@ function togglePause() {
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMain();
+    pauseOverlay.classList.remove('hidden');
+    resumeBtn.focus();
   }
+  if (!paused) {
+    pauseOverlay.classList.add('hidden');
+    blurActive();
+  }
+}
+
+// evita que Space/Enter activen el botón/select enfocado al volver al juego
+function blurActive() {
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+}
+
+function showPauseMain() {
+  pauseControls.classList.add('hidden');
+  pauseMain.classList.remove('hidden');
+}
+
+function showPauseControls() {
+  pauseMain.classList.add('hidden');
+  pauseControls.classList.remove('hidden');
+  controlsBackBtn.focus();
 }
 
 function loop(ts) {
@@ -285,22 +319,27 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = intervalForLevel(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  pauseOverlay.classList.add('hidden');
+  blurActive();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (!e.repeat) togglePause();
+    return;
+  }
   if (e.code === 'KeyT') { toggleTheme(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -326,6 +365,20 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+resumeBtn.addEventListener('click', togglePause);
+pauseRestartBtn.addEventListener('click', init);
+controlsBtn.addEventListener('click', showPauseControls);
+controlsBackBtn.addEventListener('click', () => { showPauseMain(); controlsBtn.focus(); });
+
+for (let i = 1; i <= MAX_START_LEVEL; i++) {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = i;
+  startLevelSelect.appendChild(opt);
+}
+startLevelSelect.addEventListener('change', () => {
+  startLevel = Number(startLevelSelect.value) || 1; // se aplica en la próxima init()
+});
 
 themeToggle.addEventListener('click', () => {
   toggleTheme();
